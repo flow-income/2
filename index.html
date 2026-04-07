@@ -3,59 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>플로우인컴 AI 프롬프트 모음집</title>
+<title>수강생 프롬프트자료</title>
 <style>
-  #lock-screen {
-    position:fixed;inset:0;z-index:99999;
-    background:linear-gradient(135deg,#111111 0%,#1A1A1A 60%,#0D0D0D 100%);
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
-  }
-  #lock-box { text-align:center;width:100%;max-width:360px;padding:0 28px; }
-  #pw-input {
-    width:100%;box-sizing:border-box;padding:14px 18px;
-    font-size:26px;font-weight:700;letter-spacing:10px;text-align:center;
-    border:2px solid #333;border-radius:12px;background:#222;color:#fff;
-    outline:none;transition:border-color .2s;margin-bottom:14px;
-  }
-  #pw-input:focus { border-color:#FF6A00; }
-  #pw-btn {
-    width:100%;padding:14px;background:#FF6A00;color:#fff;
-    font-size:15px;font-weight:700;border:none;border-radius:12px;
-    cursor:pointer;transition:background .2s;letter-spacing:1px;
-  }
-  #pw-btn:hover { background:#E85D00; }
-  #pw-error { color:#FF6A00;font-size:13px;margin-top:12px;min-height:20px;font-weight:600; }
-  #main-content { display:none; }
-  #chapter-nav::-webkit-scrollbar { display:none; }
-  #chapter-nav a.active { color:#FF6A00 !important;border-bottom-color:#FF6A00 !important; }
+  #pw-gate{position:fixed;inset:0;z-index:99999;background:#111;display:flex;align-items:center;justify-content:center;}
+  #pw-gate.hidden{display:none;}
+  .pw-box{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:48px 40px;width:100%;max-width:400px;box-sizing:border-box;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+  .pw-logo{font-size:22px;font-weight:900;color:#FF6600;letter-spacing:3px;margin-bottom:8px;}
+  .pw-title{color:#fff;font-size:16px;font-weight:700;margin-bottom:4px;}
+  .pw-sub{color:#666;font-size:12px;margin-bottom:32px;}
+  .pw-input-wrap{position:relative;margin-bottom:12px;width:100%;}
+  .pw-input{width:100%;box-sizing:border-box;background:#111;border:1.5px solid #333;border-radius:8px;color:#fff;font-size:15px;padding:14px 48px 14px 16px;outline:none;transition:.2s;font-family:inherit;}
+  .pw-input:focus{border-color:#FF6600;}
+  .pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#555;font-size:16px;padding:4px;}
+  .pw-toggle:hover{color:#FF6600;}
+  .pw-btn{width:100%;background:#FF6600;border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:700;padding:14px;cursor:pointer;transition:.2s;font-family:inherit;margin-top:4px;}
+  .pw-btn:hover{background:#FF8C42;}
+  .pw-btn:active{transform:scale(.98);}
+  .pw-error{color:#ff4444;font-size:12px;margin-top:10px;min-height:18px;}
+  .pw-shake{animation:shake .35s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 </style>
 </head>
 <body style="margin:0;padding:0;background:#FAF8F5;font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;color:#1A1A1A;line-height:1.6;">
 
-<!-- 비밀번호 잠금 화면 -->
-<div id="lock-screen">
-  <div id="lock-box">
-    <div style="font-size:52px;margin-bottom:16px;">🔐</div>
-    <div style="display:inline-block;background:#FF6A00;color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;padding:5px 16px;border-radius:20px;margin-bottom:20px;">💰 FLOWINCOME · 수강생 전용 자료</div>
-    <h1 style="color:#fff;font-size:22px;font-weight:900;margin:0 0 8px;">AI 프롬프트 모음집</h1>
-    <p style="color:#A89880;font-size:13px;margin:0 0 32px;">수강생 전용 자료입니다. 비밀번호를 입력해주세요.</p>
-    <input id="pw-input" type="password" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')checkPw()" />
-    <button id="pw-btn" onclick="checkPw()">입장하기 →</button>
-    <p id="pw-error">&nbsp;</p>
+<!-- ── PASSWORD GATE ── -->
+<div id="pw-gate">
+  <div class="pw-box">
+    <div class="pw-logo">FLOW INCOME</div>
+    <div class="pw-title">수강생 프롬프트자료</div>
+    <div class="pw-sub">비밀번호를 입력해 주세요</div>
+    <div class="pw-input-wrap">
+      <input id="pw-input" class="pw-input" type="password" placeholder="비밀번호 입력" autocomplete="off"/>
+      <button class="pw-toggle" onclick="togglePw()" id="pw-eye">👁</button>
+    </div>
+    <button class="pw-btn" onclick="checkPw()">입장하기</button>
+    <div class="pw-error" id="pw-error"></div>
   </div>
 </div>
 
-<div id="main-content">
+<script>
+  (function(){
+    var PW = '0821';
+    var gate = document.getElementById('pw-gate');
+    var input = document.getElementById('pw-input');
+    var errorEl = document.getElementById('pw-error');
+
+    if(sessionStorage.getItem('fi_prompt_auth') === '1'){
+      gate.classList.add('hidden');
+    }
+
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter') checkPw();
+    });
+
+    window.checkPw = function(){
+      if(input.value === PW){
+        sessionStorage.setItem('fi_prompt_auth','1');
+        gate.classList.add('hidden');
+      } else {
+        errorEl.textContent = '비밀번호가 올바르지 않습니다.';
+        var box = document.querySelector('.pw-box');
+        box.classList.remove('pw-shake');
+        void box.offsetWidth;
+        box.classList.add('pw-shake');
+        input.value = '';
+        input.focus();
+      }
+    };
+
+    window.togglePw = function(){
+      input.type = input.type === 'password' ? 'text' : 'password';
+      document.getElementById('pw-eye').textContent = input.type === 'password' ? '👁' : '🙈';
+    };
+  })();
+</script>
 
 <!-- 헤더 -->
 <div style="background:linear-gradient(135deg,#111111 0%,#1A1A1A 60%,#0D0D0D 100%);padding:50px 40px 44px;text-align:center;">
   <div style="display:inline-block;background:#FF6A00;color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;padding:5px 16px;border-radius:20px;margin-bottom:18px;">💰 FLOWINCOME · 수강생 전용 자료</div>
   <h1 style="font-size:38px;font-weight:900;color:#fff;line-height:1.2;margin:0 0 10px;">AI <span style="color:#FF6A00;">프롬프트 모음집</span></h1>
-  <p style="color:#A89880;font-size:14px;margin:0 0 28px;">복사해서 바로 쓰는 29개 프롬프트 — 번역 · 상품명 · 소개글 · SNS · 전자책 제작 · 블로그 포스팅 · 무료 전자책 · PLR 합본</p>
+  <p style="color:#A89880;font-size:14px;margin:0 0 28px;">복사해서 바로 쓰는 27개 프롬프트 — 번역 · 현지화+최신화 · 상품명 · 소개글 · SNS · 전자책 제작 · 블로그 포스팅 · 무료 전자책 · PLR 합본</p>
   <div>
     <span style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);color:#fff;padding:7px 16px;border-radius:8px;font-size:12px;margin:4px;">📋 총 7개 챕터</span>
-    <span style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);color:#fff;padding:7px 16px;border-radius:8px;font-size:12px;margin:4px;">✍️ 29개 프롬프트</span>
+    <span style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);color:#fff;padding:7px 16px;border-radius:8px;font-size:12px;margin:4px;">✍️ 27개 프롬프트</span>
     <span style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);color:#fff;padding:7px 16px;border-radius:8px;font-size:12px;margin:4px;">🤖 Claude</span>
     <span style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);color:#fff;padding:7px 16px;border-radius:8px;font-size:12px;margin:4px;">✨ 젠스파크(Genspark)</span>
   </div>
@@ -88,7 +118,48 @@
   </div>
 </div>
 
+<style>
+#chapter-nav::-webkit-scrollbar { display: none; }
+#chapter-nav a.active {
+  color: #FF6A00 !important;
+  border-bottom-color: #FF6A00 !important;
+}
+</style>
 
+<script>
+(function() {
+  var sections = ['ch01','ch02','ch03','ch04','ch05','ch06','ch07'];
+  var links = document.querySelectorAll('#chapter-nav a');
+  var navHeight = 46;
+
+  function setActive() {
+    var scrollY = window.scrollY || window.pageYOffset;
+    var current = '';
+    sections.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top <= navHeight + 20) {
+        current = id;
+      }
+    });
+    links.forEach(function(a) {
+      a.classList.remove('active');
+      a.style.color = '#A89880';
+      a.style.borderBottomColor = 'transparent';
+    });
+    if (current) {
+      var idx = sections.indexOf(current);
+      if (links[idx]) {
+        links[idx].classList.add('active');
+        links[idx].style.color = '#FF6A00';
+        links[idx].style.borderBottomColor = '#FF6A00';
+      }
+    }
+  }
+
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+})();
+</script>
 
 <div style="max-width:820px;margin:0 auto;padding:32px 20px 60px;">
 
@@ -112,21 +183,32 @@
 
   <!-- P01 -->
   <div style="background:#fff;border-radius:14px;border:1px solid #E8E0D8;border-left:4px solid #FF6A00;margin-bottom:14px;">
-    <div style="padding:16px 20px 6px;"><span style="background:#FF6A00;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;">PROMPT 01</span><span style="font-size:15px;font-weight:700;margin-left:10px;">번역 완료 파일 전체 한국화 다듬기</span></div>
+    <div style="padding:16px 20px 6px;"><span style="background:#FF6A00;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;">PROMPT 01</span><span style="font-size:15px;font-weight:700;margin-left:10px;">번역 완료 파일 전체 한국화 + 최신화 다듬기</span></div>
     <p style="font-size:12px;color:#64748B;margin:0;padding:0 20px 10px;">Module 3 — 강 6에서 사용 · DeepL 번역 완료 후 파일 업로드해서 한 번에 처리</p>
     <div style="margin:0 20px 12px;background:#FFF3E8;border-left:3px solid #FF6A00;border-radius:8px;padding:16px 18px;">
       <p style="font-size:13.5px;line-height:1.85;color:#1A1A1A;margin:0;white-space:pre-line;">첨부한 파일은 영문 PLR 전자책을 DeepL로 번역한 한국어 원고야.
-이 파일 전체를 아래 기준으로 한국 독자에게 맞게 다듬어줘.
+이 파일 전체를 아래 기준으로 한국 독자에게 맞게 다듬고, 오래된 정보는 최신 내용으로 자연스럽게 업데이트해줘.
 
-다듬기 기준:
+【현지화 기준】
 1. 직역체 표현 → 자연스러운 한국어 구어체로 교체
 2. '당신은 ~할 수 있습니다' → '~하시면 됩니다' 식으로 수정
 3. 미국식 단위(파운드, 온스, 화씨, 컵) → 한국식(kg, g, ℃, ml)으로 변환
-4. 원문 의미와 챕터 구성은 그대로 유지
+4. 미국·서양 기준의 사례, 브랜드명, 플랫폼명이 나오면 한국 독자에게 친숙한 것으로 교체
+   (예: "Amazon" → "쿠팡 또는 네이버 스마트스토어", "Instagram Reels" → "인스타그램 릴스" 그대로 유지하되 설명 추가)
+5. 원문 의미와 챕터 구성은 그대로 유지
 
-수정된 전체 원고를 완성본으로 출력해줘.</p>
+【최신화 기준】
+6. 본문에 특정 연도가 언급된 통계·데이터·수치가 나오면, 현재 시점 기준으로 자연스럽게 교체하거나 "최근 연구에 따르면" / "최근 조사에서는" 식의 표현으로 바꿔줘
+7. 더 이상 존재하지 않거나 시대에 뒤처진 서비스·앱·플랫폼명이 나오면 현재 널리 쓰이는 동종 서비스로 교체해줘
+   (예: 구글+, 야후 답변, Vine 등 → 현재 대체 서비스 명시)
+8. "~년 기준", "최신 연구(20XX)" 처럼 오래된 출처 표기가 있으면 해당 수치만 남기고 연도 표기는 삭제하거나 "최근" 으로 교체해줘
+9. 단, 확실한 최신 정보로 대체할 수 없는 경우에는 임의로 수치를 만들지 말고, 해당 문장 끝에 [최신 정보 확인 필요] 라고 표시해줘
+
+수정된 전체 원고를 완성본으로 출력해줘.
+최신화 과정에서 수정한 항목이 있다면 원고 맨 끝에 【최신화 수정 목록】으로 따로 정리해줘.</p>
     </div>
-    <p style="font-size:12px;color:#64748B;padding:0 20px 14px;margin:0;">💡 파일을 첨부한 후 이 프롬프트를 함께 입력하세요. Word(.docx) 또는 PDF 파일 모두 가능합니다.</p>
+    <p style="font-size:12px;color:#64748B;padding:0 20px 6px;margin:0;">💡 파일을 첨부한 후 이 프롬프트를 함께 입력하세요. Word(.docx) 또는 PDF 파일 모두 가능합니다.</p>
+    <p style="font-size:12px;color:#CC5500;font-weight:600;padding:0 20px 14px;margin:0;">⚠️ [최신 정보 확인 필요] 표시가 있는 항목은 반드시 직접 검색해서 최신 수치로 보완하세요.</p>
   </div>
 
   <!-- P02 -->
@@ -193,83 +275,6 @@
 출력 형태는 상품 소개글에 바로 복사해서 쓸 수 있도록 깔끔하게 정리해줘.</p>
     </div>
     <p style="font-size:12px;color:#64748B;padding:0 20px 14px;margin:0;">💡 정리된 목차를 리틀리 상품 소개글 미리보기 섹션에 그대로 붙여넣으세요.</p>
-  </div>
-
-  <!-- P04-A -->
-  <div style="background:#fff;border-radius:14px;border:1px solid #E8E0D8;border-left:4px solid #FF6A00;margin-bottom:14px;">
-    <div style="padding:16px 20px 6px;">
-      <span style="background:#FF6A00;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;">PROMPT 04-A</span>
-      <span style="font-size:15px;font-weight:700;margin-left:10px;">번역 원고 퀄리티 업그레이드 — 내용 심화</span>
-    </div>
-    <p style="font-size:12px;color:#64748B;margin:0;padding:0 20px 10px;">PLR 원고 번역·다듬기 완료 후 · 내용이 너무 얕거나 단순할 때 깊이와 밀도를 높이는 단계</p>
-    <div style="margin:0 20px 12px;background:#FFF3E8;border-left:3px solid #FF6A00;border-radius:8px;padding:16px 18px;">
-      <p style="font-size:13.5px;line-height:1.85;color:#1A1A1A;margin:0;white-space:pre-line;">너는 논픽션 전자책 편집 전문가야.
-첨부한 파일은 PLR 전자책을 번역·다듬기까지 완료한 한국어 원고야.
-원문의 구조와 흐름은 그대로 유지하면서, 아래 기준으로 내용의 깊이와 퀄리티를 끌어올려줘.
-
-━━━━━━━━━━━━━━━━━━━━
-📄 업그레이드 기준
-━━━━━━━━━━━━━━━━━━━━
-1. 내용 심화
-   - 각 챕터에서 핵심 주장의 근거나 이유를 1~2가지 추가
-   - '~하세요'로 끝나는 조언에는 '왜 그래야 하는지' 설명을 덧붙이기
-   - 너무 추상적인 설명은 구체적인 예시나 수치로 보완
-
-2. 실용성 강화
-   - 독자가 바로 실천할 수 있는 '액션 포인트'를 각 챕터 끝에 1~3가지 추가
-   - '이렇게 해보세요' 형식의 단계별 가이드로 전환 가능한 부분은 전환
-
-3. 가독성 향상
-   - 너무 긴 단락(6줄 이상)은 자연스럽게 나누기
-   - 중요한 문장은 앞에 '💡' 또는 '→' 같은 시각 요소로 강조
-   - 챕터 시작 부분에 '이번 챕터에서 배울 것' 한 줄 추가
-
-4. 톤 유지
-   - 원문의 문체와 말투는 그대로 유지
-   - 추가되는 내용이 기존 원고와 어색하지 않게 자연스럽게 녹아들도록
-
-수정된 전체 원고를 완성본으로 출력해줘.</p>
-    </div>
-    <p style="font-size:12px;color:#64748B;padding:0 20px 6px;margin:0;">💡 챕터 수가 많으면 '1챕터씩 업그레이드해줘'라고 나눠서 요청하는 게 결과물 품질이 더 높습니다.</p>
-    <p style="font-size:12px;color:#FF6A00;font-weight:600;padding:0 20px 14px;margin:0;">⚠️ 추가된 내용이 원래 원고와 자연스럽게 이어지는지 반드시 직접 읽어보며 확인하세요.</p>
-  </div>
-
-  <!-- P04-B -->
-  <div style="background:#fff;border-radius:14px;border:1px solid #E8E0D8;border-left:4px solid #FF6A00;margin-bottom:14px;">
-    <div style="padding:16px 20px 6px;">
-      <span style="background:#FF6A00;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;">PROMPT 04-B</span>
-      <span style="font-size:15px;font-weight:700;margin-left:10px;">번역 원고 퀄리티 업그레이드 — 문장·구성 리라이팅</span>
-    </div>
-    <p style="font-size:12px;color:#64748B;margin:0;padding:0 20px 10px;">내용은 괜찮지만 문장이 딱딱하거나 전체 흐름이 어색할 때 · 완성도를 한 단계 끌어올리는 단계</p>
-    <div style="margin:0 20px 12px;background:#FFF3E8;border-left:3px solid #FF6A00;border-radius:8px;padding:16px 18px;">
-      <p style="font-size:13.5px;line-height:1.85;color:#1A1A1A;margin:0;white-space:pre-line;">너는 한국어 논픽션 편집 전문가야.
-첨부한 파일은 PLR 전자책을 번역·다듬기까지 완료한 한국어 원고야.
-내용과 정보는 유지하면서, 아래 기준으로 문장과 전체 구성을 더 읽히는 글로 리라이팅해줘.
-
-━━━━━━━━━━━━━━━━━━━━
-📄 리라이팅 기준
-━━━━━━━━━━━━━━━━━━━━
-1. 문장 리라이팅
-   - 번역투 냄새가 남은 문장은 한국어 원고처럼 자연스럽게 재작성
-   - 수동태·명사형 문장 → 능동태·서술형으로 전환
-     (예: '~이 이루어집니다' → '~할 수 있어요')
-   - 한 문장에 내용이 2개 이상 섞인 경우 → 두 문장으로 분리
-   - 딱딱한 연결어('또한', '그러므로') → 자연스러운 표현으로 교체
-     (예: '그러니까', '그래서', '그런 만큼')
-
-2. 챕터 구성 강화
-   - 각 챕터 첫 문단: 독자의 공감을 이끌어내는 문장으로 시작
-   - 각 챕터 마지막 문단: 다음 챕터로 자연스럽게 이어지는 브릿지 문장 추가
-   - 내용 나열 방식이 단조로우면 '스토리 → 정보 → 실천' 구조로 재배치
-
-3. 전체 톤 통일
-   - 챕터마다 말투가 달라지는 부분 통일
-   - 선택한 말투: [친근한 블로그체 / 신뢰감 있는 전문가체] ← 하나 선택해서 입력
-
-수정된 전체 원고를 완성본으로 출력해줘.</p>
-    </div>
-    <p style="font-size:12px;color:#64748B;padding:0 20px 6px;margin:0;">💡 04-A(내용 심화)와 04-B(문장 리라이팅)를 순서대로 모두 거치면 가장 높은 완성도를 얻을 수 있어요.</p>
-    <p style="font-size:12px;color:#FF6A00;font-weight:600;padding:0 20px 14px;margin:0;">⚠️ 전체 리라이팅 후에는 PROMPT 03(품질 검수)으로 최종 점검하는 것을 권장합니다.</p>
   </div>
 
   <!-- CHAPTER 02 -->
@@ -1131,61 +1136,6 @@ PROMPT 25에서 나온 새 목차: [붙여넣기]
   <strong style="color:#111111;">💰 플로우인컴</strong> · 수강생 전용 자료 · 무단 배포 금지<br>
   이 문서는 수강생 학습 목적으로만 사용 가능합니다
 </div>
-
-</div><!-- /main-content -->
-
-<script>
-function checkPw() {
-  var val = document.getElementById('pw-input').value;
-  var err = document.getElementById('pw-error');
-  if (val === '0821') {
-    document.getElementById('lock-screen').style.display = 'none';
-    document.getElementById('main-content').style.display = 'block';
-    // re-run nav active state
-    if (typeof initNav === 'function') initNav();
-  } else {
-    err.textContent = '비밀번호가 올바르지 않습니다.';
-    document.getElementById('pw-input').value = '';
-    document.getElementById('pw-input').focus();
-    // shake animation
-    var box = document.getElementById('pw-input');
-    box.style.borderColor = '#FF6A00';
-    box.style.animation = 'none';
-    setTimeout(function(){ box.style.borderColor = '#333'; }, 1000);
-  }
-}
-
-// Also run nav scroll highlight after unlock
-(function() {
-  var sections = ['ch01','ch02','ch03','ch04','ch05','ch06','ch07'];
-  window.initNav = function() {
-    var links = document.querySelectorAll('#chapter-nav a');
-    function setActive() {
-      var scrollY = window.scrollY || window.pageYOffset;
-      var current = '';
-      sections.forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= 70) current = id;
-      });
-      links.forEach(function(a) {
-        a.classList.remove('active');
-        a.style.color = '#A89880';
-        a.style.borderBottomColor = 'transparent';
-      });
-      if (current) {
-        var idx = sections.indexOf(current);
-        if (links[idx]) {
-          links[idx].classList.add('active');
-          links[idx].style.color = '#FF6A00';
-          links[idx].style.borderBottomColor = '#FF6A00';
-        }
-      }
-    }
-    window.addEventListener('scroll', setActive, { passive: true });
-    setActive();
-  };
-})();
-</script>
 
 </body>
 </html>
